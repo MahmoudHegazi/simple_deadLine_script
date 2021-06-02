@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<style>
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+  padding: 20px;
+}
+
+div.gv-table-view {
+   width: 300px;
+   padding: 10px;
+}
+
+div.days-remaining-container{
+     width: 300px;
+   padding: 10px;
+}
+</style>
+<script>
+jQuery( document ).ready(function( $ ) {
+
+// convert month text to number
+
+var dateHandler = {
+   initalDateString: undefined,
+   initalTimeObject: undefined,
+   endDateString: undefined,
+   endTimeObject: undefined,
+   
+   // function to get the month name
+   monthName: (monthIndex) => {
+     months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+     var n = months[monthIndex];
+     return n;
+    },
+   
+   // function to formate the date add color and ago or remaning
+   formatedMesage: (days, bool)=> {
+            let selectedColor;
+            let message;
+       
+            if (bool && days >= 5) {
+               selectedColor = '#1fad66';
+               message = days + " Days remaining."; 
+                return {message: message, color: selectedColor};
+            };
+            
+            if (bool && days < 5 && days >= 3) {
+               selectedColor = '#ffff00';
+               message = days + " Days remaining."; 
+                return {message: message, color: selectedColor};
+            };
+            
+            
+            if ( (bool && days < 3 && days > 1) ) {
+               selectedColor = '#c63939';
+               message = days + " Days remaining"; ;
+                return {message: message, color: selectedColor};
+            };
+            
+            if ( (bool && days == 1) ) {
+               selectedColor = '#c63939';
+               message = days + " Day remaining."; ;
+                return {message: message, color: selectedColor};
+            };
+            
+            
+            if (days == 0) {
+                selectedColor = '#c63939';
+                message = days + " Days Remaining."; 
+                return {message: message, color: selectedColor};
+            
+            }
+            
+            if ( !bool && days == 1 ) {
+               selectedColor = '#c63939';
+               message = days + " Day ago."; 
+                return {message: message, color: selectedColor};
+            };
+            
+            if ( !bool ) {
+               selectedColor = '#c63939';
+               message = days + " Days ago."; 
+                return {message: message, color: selectedColor};
+            };
+            
+           
+   },
+     
+   // function to add days to a given date and return date string
+   addDays: (dstring)=> {
+      // inital time
+      dateHandler.initalDateString = dstring;
+      dateHandler.initalTimeObject = new Date(dstring);
+      
+            
+      dateHandler.initalDateString = (dateHandler.initalTimeObject.getMonth()+1) + "/" + 
+      dateHandler.initalTimeObject.getDate() + "/" + dateHandler.initalTimeObject.getFullYear();
+      
+      
+      // after 7 days
+      let dateObjectEnd = new Date(dstring);      
+      dateObjectEnd.setDate(dateObjectEnd.getDate() + 7);
+      
+      // get date after content
+      let endMonthName = dateHandler.monthName(dateObjectEnd.getMonth());
+      let endMonthNumber = dateObjectEnd.getMonth()+1;
+      let endDay = dateObjectEnd.getDate();
+      let endYear = dateObjectEnd.getFullYear();
+      
+      // asgin properties
+      dateHandler.endDateString = endMonthNumber + "/" + endDay + "/" + endYear;
+      dateHandler.endTimeObject = dateObjectEnd;
+      
+      return dateHandler.endDateString;
+   },
+   
+   daysdifference : (firstDate, secondDate)=> {
+      var startDay = new Date(firstDate);
+      var endDay = new Date(secondDate);
+
+      // Determine the time difference between two dates
+      var millisBetween = startDay.getTime() - endDay.getTime();
+      // Determine the number of days between two dates
+      var days = millisBetween / (1000 * 3600 * 24);
+
+      // Show the final number of days between dates
+      return Math.round(Math.abs(days));
+      },
+      
+   getRemaningDays: (dateString)=> {
+      let deadLine = new Date(dateHandler.addDays(dateString));
+      let currentDate = new Date();
+      
+
+      let difrrenceMilleSeconds;
+      let timeRemaning;
+      let resultObject;
+      
+      if (currentDate > deadLine) {
+      
+         // if currentDate date is bigger than deadLine dateline passed
+
+         
+         let daysdfirence = dateHandler.daysdifference(currentDate, dateHandler.endDateString);
+         
+         
+         resultObject = dateHandler.formatedMesage(daysdfirence, false);
+         
+         return {message: resultObject.message, color: resultObject.color};
+
+        
+      } else if (deadLine > currentDate) {
+         // if deadline date is bigger than current date  deadline not come yet
+        
+       let daysdfirence = dateHandler.daysdifference(dateHandler.endDateString, currentDate);
+       
+         resultObject = dateHandler.formatedMesage(daysdfirence, true);
+         return {message: resultObject.message, color: resultObject.color};
+        
+      } else {
+         return {message: "DeadLine Now", color: "red"};
+      }
+      
+     
+   }
+};
+
+
+
+var inspectDate = jQuery('.gv-table-view tr:first-child td:first-child').text();
+
+var endObject = dateHandler.getRemaningDays(inspectDate);
+
+
+
+
+jQuery('.days-remaining-container').text(endObject.message);
+jQuery('.days-remaining-container').css("background", endObject.color);
+
+
+
+
+
+});
+</script>
+</head>
+<body>
+
+ <h3> Table (gv-field-2-date_created) </h3>
+<table class="gv-table-view">
+  <tbody>
+    <tr>
+      <td id="gv-field-2-date_created"><span>May 25, 2021</span></td>
+    </tr>
+  </tbody>
+</table>
+
+
+<h3> Div Class (days-remaining-container) </h3>
+
+<div class="days-remaining-container">
+</div>
+
+
+
+</body>
+</html>
